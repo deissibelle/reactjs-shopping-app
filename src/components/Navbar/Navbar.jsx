@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { FaLeaf } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { MdMenu } from "react-icons/md";
+import {motion} from "framer-motion";
 
 const NavbarMenu = [
   { id: 1, title: "Home", link: "/" },
@@ -15,6 +16,7 @@ export default class Navbar extends Component {
   state = { isMobileMenuOpen: false };
 
   menuRef = React.createRef();
+  menuButtonRef = React.createRef();
 
   componentDidUpdate(_, prevState) {
     if (this.state.isMobileMenuOpen && !prevState.isMobileMenuOpen) {
@@ -25,19 +27,31 @@ export default class Navbar extends Component {
   }
 
   handleOutsideClick = (event) => {
-    if (this.menuRef.current && !this.menuRef.current.contains(event.target)) {
+    // Check if the click is outside both the menu and the menu button
+    if (
+      this.menuRef.current &&
+      !this.menuRef.current.contains(event.target) &&
+      this.menuButtonRef.current &&
+      !this.menuButtonRef.current.contains(event.target)
+    ) {
       this.setState({ isMobileMenuOpen: false });
     }
   };
 
   toggleMobileMenu = () => {
-    this.setState((prevState) => ({ isMobileMenuOpen: !prevState.isMobileMenuOpen }));
+    this.setState((prevState) => ({
+      isMobileMenuOpen: !prevState.isMobileMenuOpen,
+    }));
   };
 
   render() {
     return (
       <nav className="bg-white shadow-md py-4">
-        <div className="container mx-auto flex justify-between items-center px-4">
+        <motion.div 
+         initial={{ opacity: 0}}
+         animate={{ opacity: 1 }}
+         transition={{ duration: 0.5, delay: 0.5 }}
+        className="container mx-auto flex justify-between items-center px-4">
           {/* Logo Section */}
           <div className="text-2xl flex items-center gap-2 font-bold uppercase">
             <p className="text-primary">Fruit</p>
@@ -66,21 +80,29 @@ export default class Navbar extends Component {
 
           {/* Mobile Hamburger Menu Section */}
           <div className="md:hidden flex items-center">
-            <button onClick={this.toggleMobileMenu} className="text-4xl">
+            <button
+              onClick={this.toggleMobileMenu}
+              className="text-4xl"
+              ref={this.menuButtonRef} // Reference for the menu button
+            >
               <MdMenu />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Mobile Menu Dropdown */}
         {this.state.isMobileMenuOpen && (
-          <div ref={this.menuRef} className="md:hidden bg-white shadow-lg rounded-3xl">
+          <div
+            ref={this.menuRef}
+            className="md:hidden bg-white shadow-lg rounded-3xl"
+          >
             <ul className="flex flex-col items-center gap-4 py-4">
               {NavbarMenu.map((menu) => (
                 <li key={menu.id} className="text-xl">
                   <a
                     href={menu.link}
                     className="inline-block py-1 px-3 hover:text-primary hover:shadow-[0_3px_0_-1px_#ef4444] font-semibold"
+                    onClick={this.toggleMobileMenu} // Close menu on link click
                   >
                     {menu.title}
                   </a>
